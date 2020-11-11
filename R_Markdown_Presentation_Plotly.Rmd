@@ -1,0 +1,81 @@
+---
+title: "R_Markdown_Presentation_Plotly"
+author: "ETSulato"
+date: "11/11/2020"
+output: html_document
+---
+## About the project
+
+  
+
+## Loading packages and processing the data
+
+Subseting only important columns for this project and transforming coordinates variables in a 3d data frame.
+```{r meuse, echo=T, message=FALSE}
+library(plotly)
+```
+
+```{r}
+data<- read.csv("inpe_brazilian_amazon_fires_1999_2019.csv", header = T)
+
+head(data)
+```
+
+# Cleaning data
+
+```{r}
+data<-mutate(data, mist = paste("Firespots=", firespots, ", States=", state))
+```
+
+## Plotting the data
+```{r}
+fig <- plot_ly(
+  type = "scatter",
+  x = data$year, 
+  y = data$firespots,
+  mode = "markers+lines") 
+fig <- fig %>%
+  layout(
+    xaxis = list(
+      type='date',
+      tickformatstops = list(
+        list(
+          dtickrange = list(NULL, 1000), 
+          value = "%H:%M:%S.%L ms"
+        ), 
+        list(
+          dtickrange = list(1000, 60000), 
+          value = "%H:%M:%S s"
+        ), 
+        list(
+          dtickrange = list(60000, 3600000), 
+          value = "%H:%M m"
+        ), 
+        list(
+          dtickrange = list(3600000, 86400000), 
+          value = "%H:%M h"
+        ), 
+        list(
+          dtickrange = list(86400000, 604800000), 
+          value = "%e. %b d"
+        ), 
+        list(
+          dtickrange = list(604800000, "M1"), 
+          value = "%e. %b w"
+        ), 
+        list(
+          dtickrange = list("M1", "M12"), 
+          value = "%b '%y M"
+        ), 
+        list(
+          dtickrange = list("M12", NULL), 
+          value = "%Y Y"
+        )
+      )
+    )
+  )
+
+fig
+```
+
+## Thank you!
