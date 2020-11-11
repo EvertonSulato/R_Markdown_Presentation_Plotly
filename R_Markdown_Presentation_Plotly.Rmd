@@ -4,78 +4,58 @@ author: "ETSulato"
 date: "11/11/2020"
 output: html_document
 ---
-## About the project
+# About the project
 
+The deforestation of the Amazon forest occurs for several reasons, such as illegal agriculture, natural disasters, urbanization, and mining, being frequent the occurence of burning and or wood extraction. This data set was obtained from a file "inpebrazilianamazonfires1999_2019", from the National Institute for Space Research (INPE), which brings the number of firespot in the Brazilian Amazon by state, month and year, from 1999 to 2019. The original data are public and were extracted from the INPE website on December 13, 2019. Available at https://www.kaggle.com/mbogernetto/brazilian-amazon-rainforest-degradation?select=inpe_brazilian_amazon_fires_1999_2019.csv.
   
 
-## Loading packages and processing the data
+# Loading packages
 
 Subseting only important columns for this project and transforming coordinates variables in a 3d data frame.
 ```{r meuse, echo=T, message=FALSE}
 library(plotly)
+library(tidyr)
+library(plyr)
 ```
+
+# Loading data
 
 ```{r}
 data<- read.csv("inpe_brazilian_amazon_fires_1999_2019.csv", header = T)
-
 head(data)
 ```
 
-# Cleaning data
+# Processing the data
 
 ```{r}
-data<-mutate(data, mist = paste("Firespots=", firespots, ", States=", state))
+groupeddata<-aggregate(firespots~year+state, data, FUN=sum)
+head(groupeddata)
 ```
 
-## Plotting the data
 ```{r}
-fig <- plot_ly(
-  type = "scatter",
-  x = data$year, 
-  y = data$firespots,
-  mode = "markers+lines") 
-fig <- fig %>%
-  layout(
-    xaxis = list(
-      type='date',
-      tickformatstops = list(
-        list(
-          dtickrange = list(NULL, 1000), 
-          value = "%H:%M:%S.%L ms"
-        ), 
-        list(
-          dtickrange = list(1000, 60000), 
-          value = "%H:%M:%S s"
-        ), 
-        list(
-          dtickrange = list(60000, 3600000), 
-          value = "%H:%M m"
-        ), 
-        list(
-          dtickrange = list(3600000, 86400000), 
-          value = "%H:%M h"
-        ), 
-        list(
-          dtickrange = list(86400000, 604800000), 
-          value = "%e. %b d"
-        ), 
-        list(
-          dtickrange = list(604800000, "M1"), 
-          value = "%e. %b w"
-        ), 
-        list(
-          dtickrange = list("M1", "M12"), 
-          value = "%b '%y M"
-        ), 
-        list(
-          dtickrange = list("M12", NULL), 
-          value = "%Y Y"
-        )
-      )
-    )
-  )
-
-fig
+spreaddata <- spread(groupeddata, state, firespots)
+head(spreaddata)
 ```
 
-## Thank you!
+
+# Plotting the data
+
+```{r}
+f<-list(family="Arial", size=18, color="black")
+y<-list(title="Firespots", titlefont=f)
+x<-list(title="Year", titlefont=f)
+
+spreaddata %>%
+plot_ly(x = ~year, y= ~ACRE, name="Acre", type = 'scatter', mode = 'lines') %>%
+  layout(yaxis=y, xaxis=x)%>%
+  add_trace(y = ~AMAPA, name = 'Amapá')%>%
+  add_trace(y = ~AMAZONAS, name = 'Amazonas')%>%
+  add_trace(y = ~MARANHAO, name = 'Maranhão')%>%
+  add_trace(y = ~`MATO GROSSO`, name = 'Mato Grosso')%>%
+  add_trace(y = ~PARA, name = 'Pará')%>%
+  add_trace(y = ~RONDONIA, name = 'Rondônia')%>%
+  add_trace(y = ~RORAIMA, name = 'Roraima')%>%
+  add_trace(y = ~TOCANTINS, name = 'Tocantins')
+```
+
+# Thank you!
